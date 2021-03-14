@@ -39,7 +39,7 @@ def plot_num_covid_by_dates():
     agg_df['state'] = agg_df['geo_value'].apply(lambda x: abbr2state[x])
     agg_df['state_id'] = agg_df['geo_value'].apply(lambda x: int(abbr2id[x]))
     agg_df['log_value'] = agg_df['value'].apply(np.log)
-    states = alt.topo_feature(data.us_10m.url, 'states')
+    states = alt.topo_feature('https://cdn.jsdelivr.net/npm/vega-datasets@v1.29.0/data/us-10m.json', 'states')
     chart = alt.Chart(agg_df).mark_geoshape().encode(
         shape='geo:G',
         color=alt.Color('log_value:Q'),
