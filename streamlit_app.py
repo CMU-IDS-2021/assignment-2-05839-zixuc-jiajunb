@@ -84,7 +84,7 @@ def plot_wm_acv_data():
         alt.X('wear_mask', scale=alt.Scale(zero=False)),
         alt.Y('covid_cases', scale=alt.Scale(zero=False)),
         color=alt.condition(picked, "covid_cases", alt.value("lightgray")),
-        tooltip=['state:N', 'covid_cases:Q']
+        tooltip=['state:N', 'wear_mask:Q', 'covid_cases:Q']
     ).add_selection(picked)
     st.write(scatter)
 
@@ -93,7 +93,7 @@ def plot_wm_acv_data():
         alt.X('accept_vaccine', scale=alt.Scale(zero=False)),
         alt.Y('covid_cases', scale=alt.Scale(zero=False)),
         color=alt.condition(picked, "covid_cases", alt.value("lightgray")),
-        tooltip=['state:N', 'covid_cases:Q']
+        tooltip=['state:N', 'wear_mask:Q', 'covid_cases:Q']
     ).add_selection(picked)
     st.write(scatter2)
 plot_num_covid_by_dates()
