@@ -145,7 +145,7 @@ def load_npp_data():
 @st.cache
 def load_covid_data():
     covid_case_data = 'data/covid-us-states.csv'
-    df = pd.read_csv(covid_case_data, sep=',', usecols=['state', 'date', 'cases', 'deaths', 'fips'])
+    df = pd.read_csv(covid_case_data, sep=',')
     dates = set(df['date'].to_numpy())
     min_date = str2datetime(min(dates))
     max_date = str2datetime(max(dates))
@@ -154,17 +154,8 @@ def load_covid_data():
 
 
 @st.cache
-def load_covid_range_data(min_date, max_date):
-    covid_case_data = 'data/covid-us-states.csv'
-    df = pd.read_csv(covid_case_data, sep=',', usecols=['state', 'date', 'cases', 'deaths'])
-    df = df[(df['date'] > min_date) & (df['date'] < max_date)]
-    df['date'] = df['date'].apply(str2datetime)
-    return df
-
-
-@st.cache
 def load_social_dist_data(path, factor):
-    df = pd.read_csv(path, sep=',', usecols=['geo_value', 'time_value', 'value'])
+    df = pd.read_csv(path, sep=',')
     df['time_value'] = df['time_value'].apply(str2datetime)
     df['factor'] = factor
     return df
@@ -199,31 +190,54 @@ def load_corr_data():
 
 
 def plot_dataset_overview():
-    st.header("Overview of dataset itself")
+    st.header('A glance of the dataset')
 
-    'COVID dataset in the U.S.A.'
+    st.sidebar.write(
+        'Note that these are not the only datasets involved in our data analysis. We only show the ones that we think can already well represent the overview of the whole data'
+    )
+
+    st.subheader('COVID overall fact dataset in the U.S.A.')
+    '''
+    This dataset comes from [New York Times](https://github.com/nytimes/covid-19-data), with date ranging from 1/21/2020 to 3/13/2021. The data is collected at the state level, with cumulative number of cases and deaths specified for each group of date and state.
+    '''
     covid_df, _, _ = load_covid_data()
     covid_df
 
-    'Estimated proportion of respondents who went to a “market, grocery store, or pharmacy” in the past 24 hours'
+    st.subheader(
+        'Survey datasets regarding to social distancing, virus protection practices, and mental health'
+    )
+    '''
+    The [CMU Delphi Survey](https://delphi.cmu.edu/covidcast/survey-results/?date=20210221) dataset contains results regarding people's practice of social distancing, how they protect themselves from the virus, and if they have any mental health issues. Since the format of these data files all look similar, we will just show the shop data here as an representative. The earliest start date of the dataset is 12/20/2020, and we selected an end date of 3/12/2021
+    '''
+    '**Description of the shop data**: Estimated proportion of respondents who went to a “market, grocery store, or pharmacy” in the past 24 hours'
     shop_data = 'data/covidcast-fb-survey-smoothed_shop_1d-2020-12-20-to-2021-03-12.csv'
     shop_df = load_social_dist_data(shop_data, 'Went to shop')
     shop_df
 
 
 def plot_num_covid_by_dates():
-    st.header("How does the number of COVID cases change by dates?")
+    st.header("Number of COVID cases in different states and dates")
+    st.subheader("Q1: How does the number of COVID cases vary by states?")
+    st.subheader("Q2: And how does the number of COVID cases change by dates?")
+
+    'For newly increased data in the map chart, it is calculated by averaging the newly increased cases/deaths throughout the entire date range'
+
+    'You may use the sliding bar below to adjust the range of date that you want to explore. The charts will interactively update based on the new range. Have fun :)'
+
     raw_df, min_d, max_d = load_covid_data()
-    time_bounds = st.sidebar.slider("Select the date range:",
-                                    min_value=min_d,
-                                    max_value=max_d,
-                                    value=(min_d, max_d))
+    time_bounds = st.slider("Select the date range:",
+                            min_value=min_d,
+                            max_value=max_d,
+                            value=(min_d, max_d))
     df = raw_df[(raw_df['date'] >= time_bounds[0]) & (raw_df['date'] <= time_bounds[1])]
     df = df[(df['state'] != 'Northern Mariana Islands') & (df['state'] != 'Guam') &
             (df['state'] != 'Virgin Islands')]
     states = alt.topo_feature('https://cdn.jsdelivr.net/npm/vega-datasets@v1.29.0/data/us-10m.json',
                               'states')
 
+    st.sidebar.write(
+        'You may view the increased number or cumulative number and COVID cases or deaths by selecting the option in the dropdown menu below. Both the map and line charts will react correspondingly.'
+    )
     num_option = st.sidebar.selectbox('Newly increased or cumulative',
                                       ('Newly increased', 'Cumulative'))
 
@@ -278,13 +292,26 @@ def plot_num_covid_by_dates():
                  alt.Tooltip('date:T', title="Date")]).properties(width=650)
 
     line_chart
+    '''
+    **Analysis**:  
+    From the map chart, it's obvious that California and Texas have the highest number of COVID cases, followed by New York and Florida. Regarding deaths, California, Texas, and New York states are the top 3.  
+      
+    From the line chart, we can see that we reached the peak daily new cases and deaths at around December 2020 and January 2021, and then it starts to decrease, probably due to the wider use of vaccines.  
+      
+    Another interesting finding is that the newly increased lines for both cases and deaths are zig-zagging. Empirically there should not be a huge difference of cases and deaths between nearby dates.
+    '''
 
 
 def plot_social_dist_data():
-    st.header("Zooming into the period of 12/20/2020 - 03/21/2021:")
-    st.header("How does social distancing affect number of COVID cases?")
-    st.header(
-        "And alternatively, how does number of COVID cases affect social distancing practices?")
+    st.header("Social distancing in COVID period")
+    st.subheader("Q1: How does social distancing affect number of COVID cases?")
+    st.subheader(
+        "Q2: And alternatively, how does number of COVID cases affect social distancing practices?")
+
+    st.sidebar.write('Which social distancing factor(s) are you interested in?')
+
+    'Due to the restriction from the survey data, we can only explore the data starting from 12/20/2020'
+    'You may **select the range of date** that you want to further explore in the below COVID cases line chart (second chart)'
 
     shop_data = 'data/covidcast-fb-survey-smoothed_shop_1d-2020-12-20-to-2021-03-12.csv'
     restaurant_data = 'data/covidcast-fb-survey-smoothed_restaurant_1d-2020-12-20-to-2021-03-12.csv'
@@ -293,7 +320,9 @@ def plot_social_dist_data():
     large_event_data = 'data/covidcast-fb-survey-smoothed_large_event_1d-2020-12-20-to-2021-03-12.csv'
     travel_data = 'data/covidcast-fb-survey-smoothed_travel_outside_state_5d-2020-12-20-to-2021-03-12.csv'
 
-    covid_case_df = load_covid_range_data('2020-12-19', '2021-03-12')
+    covid_case_df, _, _ = load_covid_data()
+    covid_case_df = covid_case_df[(covid_case_df['date'] > datetime.date(2020, 12, 19))
+                                  & (covid_case_df['date'] < datetime.date(2021, 3, 12))]
     covid_case_df = covid_case_df.groupby(['date'])
     covid_case_df = covid_case_df.agg({'cases': np.sum}).reset_index()
     covid_case_df['cases'] = covid_case_df['cases'].diff()
@@ -344,12 +373,15 @@ def plot_social_dist_data():
         factors_df = factors_df.groupby(['factor', 'time_value'])
         factors_df = factors_df.agg({'value': np.mean}).reset_index()
 
-        option = st.sidebar.selectbox('Show stacked area chart or line chart',
-                                      ('Stacked area chart: show overall factor contribution',
-                                       'Line chart: show individual factor trends'))
+        st.sidebar.write(
+            'Which kind of chart do you like for displaying factors (first chart)? Stacked area chart can show overall factor contribution, while scatter chart can more easily show individual factor trends'
+        )
 
-        if option == 'Line chart: show individual factor trends':
-            base_factors_plot = alt.Chart(factors_df).mark_line(point=True)
+        option = st.sidebar.selectbox('Show stacked area chart or scatter chart',
+                                      ('Stacked area chart', 'Scatter chart'))
+
+        if option == 'Scatter chart':
+            base_factors_plot = alt.Chart(factors_df).mark_point()
         else:
             base_factors_plot = alt.Chart(factors_df).mark_area()
 
@@ -374,10 +406,16 @@ def plot_social_dist_data():
             alt.X('time_value:T', title="Date", scale=alt.Scale(domain=date_select)))
 
         scaled_factors_plot & covid_case_line_plot
-
-        'You may **select the range of date** that you want to further explore in the **above COVID cases line plot**'
     else:
         covid_case_line_plot
+    '''
+    **Analysis**:  
+    For the first question, as far as we can tell from this time period, we don't see that social distancing practices affect COVID cases. This conclusion might change if we have survey data dating back to the start of COVID.  
+      
+    For the second question, we can see that there's an approximately inverse relationship between COVID cases and amount of non-social-distancing activities. When there were more COVID cases (e.g. at the end of December), people had better social distancing practice. However, when there were less COVID cases in February, people started to go outside.  
+      
+    Regarding each social distancing factors, we can find that over half of the people still went to shop for essentials, no matter the number of COVID cases. However, the number of people who went to restaurants and went to work/school did depend a lot on the COVID situation.
+    '''
 
 
 def plot_wm_acv_data():
