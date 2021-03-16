@@ -193,7 +193,7 @@ def load_mental_data():
 
 def plot_mental_graphs():
     st.header("Mental Health in COVID period")
-    st.subheader("Q: Does people feel anxious, depressed or isolated during covid period? Are people's feelings differed by the number of cases in their states?")
+    st.subheader("Q: Does people feel anxious, depressed or isolated during covid periods? Are people's feelings different by the number of cases in their states?")
     "Due to the restriction from the survey data, we can only explore the data starting from 12/20/2020"
     top_df, bottom_df = load_mental_data()
     d  = st.sidebar.slider("Select the date range:", 
@@ -220,7 +220,7 @@ def plot_mental_graphs():
     bottom_chart
 
     st.subheader("Analysis")
-    """In this section, we designed bar plots to see to what extent people felt anxious, depressed or isolated. We found that more people feels isolated than depressed. To see if the number of cases in the state affect the number of people who feel anxious, we collect and plot the data for the states with the top 5 number of cases per 100K people and those with bottom 5 number of cases per 100K people. We found that states with fewer cases felt more isolated but less anxious. It may result from the situation that those states carry out more stick policies which requires social distance and causes the feeling of isolation."""
+    """In this section, we designed bar plots to see to what extent people felt anxious, depressed or isolated. We found that more people feel isolated than depressed. To see if the number of cases in the state affect the number of people who feel anxious, we collect and plot the data for the states with the top 5 number of cases per 100K people and those with bottom 5 number of cases per 100K people. We found that states with fewer cases felt more isolated but less anxious. It may result from the situation that those states carry out more stick policies which requires social distance and causes the feeling of isolation."""
 
 
 @st.cache
