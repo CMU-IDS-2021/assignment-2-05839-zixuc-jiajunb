@@ -177,27 +177,26 @@ def load_mental_data():
                        on=['geo_value', 'time_value']), dfs)
     top_states_by_cases_per_1M = ['nd', 'sd', 'ri', 'ut', 'tn']
     bottom_states_by_cases_per_1M = ['hi', 'vt', 'me', 'or', 'wa']
-    tsc = set(top_states_by_cases_per_1M)
-    bsc = set(bottom_states_by_cases_per_1M)
-    
-    def process_df(target_set):
-        top_df = merged_df[merged_df['geo_value'].apply(lambda x: x in target_set)].copy()
+
+    def process_df(target_list):
+        tsc = set(target_list)
+        top_df = merged_df[merged_df['geo_value'].apply(lambda x: x in tsc)].copy()
         top_df['datetime'] = top_df['time_value'].apply(str2datetime)
         top_df = pd.melt(top_df, id_vars=['geo_value', 'datetime'],
                      value_vars=['anxious', 'depressed', 'isolated'])
         top_df['location'] = top_df['geo_value'].apply(lambda x: abbr2state[x])
         return top_df
-    top_g_df = process_df(tsc)
-    bottom_g_df = process_df(bsc)
+    top_g_df = process_df(top_states_by_cases_per_1M)
+    bottom_g_df = process_df(bottom_states_by_cases_per_1M)
     return top_g_df, bottom_g_df
 
 
 def plot_mental_graphs():
     st.header("Mental Health in COVID period")
-    st.subheader("Q1: Does people feel anxious, depressed or isolated during covid period?")
-    st.subheader("Q2: Are people's feelings differed by the number of cases in their states?")
+    st.subheader("Q: Does people feel anxious, depressed or isolated during covid period? Are people's feelings differed by the number of cases in their states?")
+    "Due to the restriction from the survey data, we can only explore the data starting from 12/20/2020"
     top_df, bottom_df = load_mental_data()
-    d  = st.slider("Select the date range:", 
+    d  = st.sidebar.slider("Select the date range:", 
                    min_value=datetime.date(2020, 12, 20),
                    max_value=datetime.date(2021, 3, 7),
                    value=datetime.date(2021, 3, 7))
@@ -218,6 +217,9 @@ def plot_mental_graphs():
 
     top_chart
     bottom_chart
+
+    st.subheader("Analysis")
+    """In this section, we designed bar plots to see to what extent people felt anxious, depressed or isolated. We found that more people feels isolated than depressed. To see if the number of cases in the state affect the number of people who feel anxious, we collect and plot the data for the states with the top 5 number of cases per 100K people and those with bottom 5 number of cases per 100K people. We found that states with fewer cases felt more isolated but less anxious. It may result from the situation that those states carry out more stick policies which requires social distance and causes the feeling of isolation."""
 
 
 @st.cache
@@ -483,7 +485,7 @@ def plot_wm_acv_data():
     picked = alt.selection_interval(encodings=["x"])
 
     st.header("Does wearing masks somewhat affect the number of COVID cases?")
-    target_date = st.slider("Select the date range:", min_value=min_d, max_value=max_d, value=max_d)
+    target_date = st.sidebar.slider("Select the date range:", min_value=min_d, max_value=max_d, value=max_d)
     target_df = merged_df[merged_df['datetime'] == target_date]
 
     scatter = alt.Chart(target_df).mark_point().encode(
@@ -501,6 +503,10 @@ def plot_wm_acv_data():
         color=alt.condition(picked, "covid_cases", alt.value("lightgray")),
         tooltip=['state:N', 'wear_mask:Q', 'covid_cases:Q']).add_selection(picked)
     st.write(scatter2)
+    st.subheader("Analysis:")
+    """In this section, we designed two scatter plots to see if there is any correlation between people’s acceptance to masks and vaccine, and the number of COVID case increases. We characterize each state as a single point in the graph. The x axis shows how many people in the survey pool are likely to wale at masks, and the y axis shows the number of COVID case increases in the state. If the points seemed to distribute along certain lines, it means there is some correlation. We found that the relation between the acceptance to masks and the number of COVID case increases fluctuate strongly as we change the day where the data are collected,”. It means based on this portion of data we have, there is not strong correlation between the acceptance to masks and the number of covid case increases. It may result from the fact that the functioning of masks takes time to be reflected as the decrease in the number of COVID cases increases. An interesting observation is that the point cluster is moving toward the right as the time slides to the right, which means more and more people start to take masks. """
+    """From the second figure, we can see a weak anti-correlation between the acceptance of vacancies and the number of COVID case increases: as more people accept vaccines, the number of COVID cases increases slower."""
+
 
 
 st.sidebar.title('COVID Question Explorer')
