@@ -1,4 +1,4 @@
-# Project name
+# COVID Question Explorer
 
 ![A screenshot of your application. Could be a GIF.](screenshot.png)
 
