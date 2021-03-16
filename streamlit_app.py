@@ -212,7 +212,8 @@ def plot_mental_graphs():
     bottom_chart = alt.Chart(bottom_df).mark_bar().encode(
         x='value:Q',
         y='location:N',
-        color='variable:N'
+        color='variable:N',
+        tooltip=['location:N', 'value:Q', 'variable:N'],
     ).properties(title='Bottom 5 States by #covid cases per 100K people')
 
     top_chart
