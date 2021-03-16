@@ -2,9 +2,7 @@
 
 ![A screenshot of your application. Could be a GIF.](screenshot.png)
 
-TODO: Update screenshot
-
-TODO: Short abstract describing the main goals and how you achieved them.
+In this work, we designed an application for researchers to track the spread of coronavirus through data visualization. We developed a four-page application to answer four groups of questions, spanning effect of social distancing, mask wearing and vaccine taking. We also visualized people's mental state (feeling anxious, depressed or isolated) during different covid periods.
 
 ## Project Goals
 
