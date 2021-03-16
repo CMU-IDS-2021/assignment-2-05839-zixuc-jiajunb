@@ -4,7 +4,8 @@ from pathlib import Path
 import numpy as np
 import altair as alt
 import datetime
-from datetime import time
+from functools import reduce
+
 
 abbr2state = {
     'al': 'Alabama',
@@ -159,6 +160,64 @@ def load_social_dist_data(path, factor):
     df['time_value'] = df['time_value'].apply(str2datetime)
     df['factor'] = factor
     return df
+
+
+@st.cache
+def load_mental_data():
+    paths = ['data/covidcast-fb-survey-smoothed_anxious_5d-2020-12-20-to-2021-03-12.csv',
+             'data/covidcast-fb-survey-smoothed_depressed_5d-2020-12-20-to-2021-03-12.csv',
+             'data/covidcast-fb-survey-smoothed_felt_isolated_5d-2020-12-20-to-2021-03-12.csv']
+    keys = ['anxious', 'depressed', 'isolated']
+    dfs = []
+    for p, k in zip(paths, keys):
+        df = pd.read_csv(p, sep=',', usecols=['geo_value', 'time_value',
+                         'value']).rename(columns={'value': k})
+        dfs.append(df)
+    merged_df = reduce(lambda x, y: pd.merge(x, y, how='inner',
+                       on=['geo_value', 'time_value']), dfs)
+    top_states_by_cases_per_1M = ['nd', 'sd', 'ri', 'ut', 'tn']
+    bottom_states_by_cases_per_1M = ['hi', 'vt', 'me', 'or', 'wa']
+    tsc = set(top_states_by_cases_per_1M)
+    bsc = set(bottom_states_by_cases_per_1M)
+    
+    def process_df(target_set):
+        top_df = merged_df[merged_df['geo_value'].apply(lambda x: x in target_set)].copy()
+        top_df['datetime'] = top_df['time_value'].apply(str2datetime)
+        top_df = pd.melt(top_df, id_vars=['geo_value', 'datetime'],
+                     value_vars=['anxious', 'depressed', 'isolated'])
+        top_df['location'] = top_df['geo_value'].apply(lambda x: abbr2state[x])
+        return top_df
+    top_g_df = process_df(tsc)
+    bottom_g_df = process_df(bsc)
+    return top_g_df, bottom_g_df
+
+
+def plot_mental_graphs():
+    st.header("Mental Health in COVID period")
+    st.subheader("Q1: Does people feel anxious, depressed or isolated during covid period?")
+    st.subheader("Q2: Are people's feelings differed by the number of cases in their states?")
+    top_df, bottom_df = load_mental_data()
+    d  = st.slider("Select the date range:", 
+                   min_value=datetime.date(2020, 12, 20),
+                   max_value=datetime.date(2021, 3, 7),
+                   value=datetime.date(2021, 3, 7))
+    top_df = top_df[top_df['datetime'] == d]
+    bottom_df = bottom_df[bottom_df['datetime'] == d]
+
+    top_chart = alt.Chart(top_df).mark_bar().encode(
+        x='value:Q',
+        y='location:N',
+        color='variable:N'
+    ).properties(title='Top 5 States by #covid cases per 100K people')
+
+    bottom_chart = alt.Chart(bottom_df).mark_bar().encode(
+        x='value:Q',
+        y='location:N',
+        color='variable:N'
+    ).properties(title='Bottom 5 States by #covid cases per 100K people')
+
+    top_chart
+    bottom_chart
 
 
 @st.cache
@@ -447,7 +506,7 @@ def plot_wm_acv_data():
 st.sidebar.title('COVID Question Explorer')
 page = st.sidebar.selectbox("Choose a question to explore", [
     'Overview of dataset', 'COVID vs state and date', 'Effect of social distancing',
-    'COVID, mask, and vaccine'
+    'COVID, mask, and vaccine', "Mental State"
 ])
 
 st.title("Let's analyze COVID Data 📊.")
@@ -462,3 +521,5 @@ elif page == 'Effect of social distancing':
     plot_social_dist_data()
 elif page == 'COVID, mask, and vaccine':
     plot_wm_acv_data()
+elif page == "Mental State":
+    plot_mental_graphs()
