@@ -7,11 +7,12 @@
 
 The COVID-19 pandemic is an unprecedented event that has influenced billions of people around the world. Since the first quarter of 2020, people’s life has been changed dramatically. Most of the things that require people to gather, such as going to work and school, become remote to ensure people’s safety and prevent COVID from further spreading. In this project, we build an interactive data visualization and analysis web application based on mainly the COVID dataset from [New York Times](https://github.com/nytimes/covid-19-data) and the [Delphi COVID Survey Results](https://delphi.cmu.edu/covidcast/survey-results/) from CMU, focusing specifically COVID data within the United States. With the interactive application we built, we hope it can help people learn more about the overall COVID situation and how exactly COVID has affected people’s life. Some of the questions we explicitly listed for users to explore include:
 
-How does the number of COVID cases/deaths vary by states?
-How does the number of COVID cases/deaths change by dates?
-How does social distancing affect the number of COVID cases?
-Alternatively, how does the number of COVID cases affect social distancing practices?
-Does people feel anxious, depressed or isolated during covid periods? Are people's feelings different by the number of cases in their states?
+- How does the number of COVID cases/deaths vary by states?
+- How does the number of COVID cases/deaths change by dates?
+- How does social distancing affect the number of COVID cases?
+- Alternatively, how does the number of COVID cases affect social distancing practices?
+- Does people feel anxious, depressed or isolated during covid periods? 
+- Are people's feelings different by the number of cases in their states?
 
 Apart from these explicit questions, the users are also free to explore other questions as needed in our application. We hope this can be helpful in letting people know more about COVID.
 
