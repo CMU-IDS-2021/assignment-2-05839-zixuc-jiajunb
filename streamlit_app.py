@@ -216,9 +216,9 @@ def plot_dataset_overview():
 
 
 def plot_num_covid_by_dates():
-    st.header("Number of COVID cases in different states and dates")
-    st.subheader("Q1: How does the number of COVID cases vary by states?")
-    st.subheader("Q2: And how does the number of COVID cases change by dates?")
+    st.header("Number of COVID cases/deaths in different states and dates")
+    st.subheader("Q1: How does the number of COVID cases/deaths vary by states?")
+    st.subheader("Q2: And how does the number of COVID cases/deaths change by dates?")
 
     'For newly increased data in the map chart, it is calculated by averaging the newly increased cases/deaths throughout the entire date range'
 
@@ -446,15 +446,17 @@ def plot_wm_acv_data():
 
 st.sidebar.title('COVID Question Explorer')
 page = st.sidebar.selectbox("Choose a question to explore", [
-    'Overview of dataset', 'COVID cases vs date and state', 'Effect of social distancing',
+    'Overview of dataset', 'COVID vs state and date', 'Effect of social distancing',
     'COVID, mask, and vaccine'
 ])
 
 st.title("Let's analyze COVID Data 📊.")
 
+st.text('By Jiajun Bao and Zixu Chen')
+
 if page == 'Overview of dataset':
     plot_dataset_overview()
-elif page == 'COVID cases vs date and state':
+elif page == 'COVID vs state and date':
     plot_num_covid_by_dates()
 elif page == 'Effect of social distancing':
     plot_social_dist_data()
